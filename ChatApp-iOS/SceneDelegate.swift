@@ -14,8 +14,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         if isLoggedIn {
             showHomeScreen()
+            print(">>> home")
         } else {
             showAuthScreen()
+            print(">>> auth")
         }
 
         window.makeKeyAndVisible()
@@ -23,8 +25,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     func showAuthScreen() {
         let storyboard = UIStoryboard(name: "Auth", bundle: nil)
-        let authNavController = storyboard.instantiateInitialViewController() as? UINavigationController
-        window?.rootViewController = authNavController
+        let loginViewController = storyboard.instantiateViewController(withIdentifier: "Login")
+        window?.rootViewController = loginViewController
     }
 
     func showHomeScreen() {
