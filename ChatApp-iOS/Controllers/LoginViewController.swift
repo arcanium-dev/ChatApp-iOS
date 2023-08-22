@@ -3,24 +3,70 @@ import FirebaseAuth
 import TransitionButton
 
 class LoginViewController: UIViewController, UITextFieldDelegate {
-    
     @IBOutlet weak var errorLabel: UILabel!
     @IBOutlet weak var passwordTextField: UITextField!
     @IBOutlet weak var emailTextField: UITextField!
-    @IBOutlet weak var loginButton: TransitionButton!
+    @IBOutlet weak var loginButton: UIButton!
+    
+    @IBOutlet weak var usernameLabel: UILabel!
+    
+    @IBOutlet weak var passwordLabel: UILabel!
     private var gradientLayer: CAGradientLayer?
+    
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        defaultAuthBackground()
         setUpAppearance()
         emailTextField.delegate = self
         passwordTextField.delegate = self
     }
     
+    
     func setUpAppearance() {
-        emailTextField.defaultTextFieldStyle(placeholder: "Email")
-        passwordTextField.defaultTextFieldStyle(placeholder: "Password")
+        
+        let userImageView = UIImageView(image: UIImage(named: "username"))
+        userImageView.frame = CGRect(x: 0, y: 0, width: 24, height: 24) // Adjust size as needed
+        userImageView.contentMode = .scaleAspectFit
+        
+        let lockImageView = UIImageView(image: UIImage(named: "lock"))
+        lockImageView.frame = CGRect(x: 0, y: 0, width: 24, height: 24) // Adjust size as needed
+        lockImageView.contentMode = .scaleAspectFit
+        
+        emailTextField.leftView = userImageView
+        emailTextField.leftViewMode = .always
+        
+        passwordTextField.leftView = lockImageView
+        passwordTextField.leftViewMode = .always
+        
+        usernameLabel.text = "Username"
+        usernameLabel.font =  UIFont(name: "Poppins-Bold", size: 14)
+        
+        passwordLabel.text = "Password"
+        passwordLabel.font = UIFont(name: "Poppins-Bold", size: 14)
+        
+        emailTextField.tintColor = UIColor.lightGray
+        emailTextField.font = UIFont(name: "Poppins-Medium", size: 14)
+        emailTextField.keyboardType = .emailAddress
+        emailTextField.autocapitalizationType = .none
+        emailTextField.autocorrectionType = .no
+        emailTextField.contentVerticalAlignment = .bottom
+        emailTextField.returnKeyType = .next
+        emailTextField.enablesReturnKeyAutomatically = true
+        
+        passwordTextField.tintColor = UIColor.lightGray
+        passwordTextField.font = UIFont(name: "Poppins-Medium", size: 14)
+        passwordTextField.keyboardType = .emailAddress
+        passwordTextField.autocapitalizationType = .none
+        passwordTextField.autocorrectionType = .no
+        passwordTextField.contentVerticalAlignment = .bottom
+        passwordTextField.returnKeyType = .next
+        passwordTextField.enablesReturnKeyAutomatically = true
+        
+        errorLabel.numberOfLines = 0
+        errorLabel.textColor = UIColor.red
+        errorLabel.font = UIFont(name: "Poppins-Regular", size: 12)
+        
         loginButton.defaultButtonStyle(title: "Login")
         
     }
@@ -35,16 +81,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         }
     }
     
-    func textFieldDidEndEditing(_ textField: UITextField) {
-        if textField == emailTextField && emailTextField.text?.isEmpty ?? true {
-            emailTextField.defaultTextFieldStyle(placeholder: "Email")
-        } else if textField == passwordTextField && passwordTextField.text?.isEmpty ?? true {
-            passwordTextField.defaultTextFieldStyle(placeholder: "Password")
-        }
-    }
-    
     @IBAction func loginTapped(_ sender: UIButton) {
-        loginButton.startAnimation()
         guard let email = emailTextField.text else { return }
         guard let password = passwordTextField.text else { return }
         
@@ -73,7 +110,6 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         let error = validateFields()
         
         if let error = error {
-            loginButton.stopAnimation(animationStyle: .shake)
             // There's something wrong with the fields, show error message
             Utilities.showError(message: error, label: errorLabel)
         } else {
@@ -81,13 +117,11 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
             Auth.auth().signIn(withEmail: email, password: password) { [self] (result, error) in
                 // Check for errors
                 if let error = error {
-                    loginButton.stopAnimation(animationStyle: .shake)
                     // There was an error creating the user
                     Utilities.showError(message: "Error signing in user: \(error.localizedDescription)", label: errorLabel)
                 } else {
                     // Transition to the home screen with a slide animation
                     errorLabel.isHidden = true
-                    loginButton.stopAnimation(animationStyle: .normal, revertAfterDelay: 2) {
                         if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
                             guard let windowScene = sceneDelegate.window?.windowScene else { return }
                             let transition = CATransition()
@@ -98,7 +132,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
                             windowScene.windows.first?.layer.add(transition, forKey: kCATransition)
                             sceneDelegate.showHomeScreen()
                         }
-                    }
+                    
                 }
             }
         }
